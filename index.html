@@ -7,53 +7,84 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: var(--tg-theme-bg-color, #131419);
-      --card-bg: var(--tg-theme-secondary-bg-color, #1e2029);
-      --text: var(--tg-theme-text-color, #f1f1f1);
-      --hint: var(--tg-theme-hint-color, #8a8d9b);
-      --btn: var(--tg-theme-button-color, #d49a37);
-      --btn-text: var(--tg-theme-button-text-color, #ffffff);
-      --accent: #e09f3e;
-      --danger: #e63946;
-      --success: #2a9d8f;
-      --border: #2c2f3e;
+      --bg: #f4f5f8;
+      --card-bg: #ffffff;
+      --text: #1a1c23;
+      --text-muted: #5e6472;
+      --border: #dcdfe6;
+      --input-bg: #f8f9fc;
+      --input-text: #11141a;
+      --accent: #d97706;
+      --accent-text: #ffffff;
+      --danger: #dc2626;
+      --primary: #2563eb;
     }
+
+    /* Kullanıcı Telegram'ı koyu modda kullanıyorsa da kusursuz kontrast sağlansın */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111318;
+        --card-bg: #1a1d24;
+        --text: #f3f4f6;
+        --text-muted: #9ca3af;
+        --border: #2d3139;
+        --input-bg: #242832;
+        --input-text: #ffffff;
+        --accent: #f59e0b;
+        --accent-text: #000000;
+        --danger: #ef4444;
+        --primary: #3b82f6;
+      }
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; font-size: 14px; }
-    
-    .card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
-    .header-title { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    label { font-size: 11px; color: var(--hint); display: block; margin-bottom: 3px; font-weight: 600; }
-    select, input[type="number"], input[type="range"] {
-      width: 100%; background: #121318; border: 1px solid var(--border); color: var(--text);
-      border-radius: 8px; padding: 8px; font-size: 13px; outline: none;
+    body { background: var(--bg); color: var(--text); padding: 12px; font-size: 14px; -webkit-tap-highlight-color: transparent; }
+
+    .card { background: var(--card-bg); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+    .header-title { font-size: 15px; font-weight: 800; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
+
+    select, input[type="number"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      color: var(--input-text);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    select:focus, input:focus { border-color: var(--accent); }
-    
-    .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-    .slider-row span { font-weight: bold; color: var(--accent); }
-    
-    .tabs { display: flex; overflow-x: auto; gap: 4px; margin-bottom: 10px; padding-bottom: 2px; }
+    select:focus, input[type="number"]:focus { border-color: var(--accent); }
+
+    .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; margin-top: 6px; }
+    .slider-row span { font-weight: 800; color: var(--accent); font-size: 13px; }
+    input[type="range"] {
+      width: 100%; accent-color: var(--accent); height: 6px; background: var(--border); border-radius: 4px; outline: none; margin-bottom: 6px;
+    }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
     .tab-btn {
-      flex: 1; min-width: 75px; padding: 8px 4px; font-size: 11px; font-weight: bold;
-      background: #121318; border: 1px solid var(--border); border-radius: 6px; color: var(--hint);
-      cursor: pointer; text-align: center; white-space: nowrap;
+      flex: 1; padding: 9px 4px; font-size: 11px; font-weight: 800;
+      background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted);
+      cursor: pointer; text-align: center; white-space: nowrap; transition: all 0.2s;
     }
-    .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-    
-    .unit-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #232634; }
+    .tab-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+
+    .unit-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .unit-row:last-child { border-bottom: none; }
-    .unit-info { font-size: 12px; }
-    .unit-meta { font-size: 10px; color: var(--hint); }
-    .unit-input { width: 85px !important; text-align: right; font-weight: bold; }
+    .unit-info { font-size: 13px; font-weight: 700; color: var(--text); }
+    .unit-meta { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .unit-input { width: 85px !important; text-align: right; padding: 7px 8px !important; }
+
+    .results { background: var(--input-bg); border-left: 4px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 8px; }
+    .power-val { font-size: 19px; font-weight: 900; }
     
-    .results { background: #181a24; border-left: 4px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 10px; }
-    .power-val { font-size: 18px; font-weight: bold; }
-    .stat-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-top: 4px; }
-    
-    .btn-reset { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--danger); color: var(--danger); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+    .btn-reset { width: 100%; padding: 11px; background: transparent; border: 1.5px solid var(--danger); color: var(--danger); border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px; font-size: 12px; }
+    .btn-reset:active { background: var(--danger); color: #fff; }
   </style>
 </head>
 <body>
@@ -79,12 +110,12 @@
       </div>
     </div>
 
-    <div style="margin-top: 6px;">
+    <div>
       <div class="slider-row"><label>Sur Seviyesi</label><span id="wallVal">0</span></div>
       <input type="range" id="wallLevel" min="0" max="10" value="0" oninput="updateSliders(); calculate();">
     </div>
 
-    <div class="grid-2" style="margin-top: 6px;">
+    <div class="grid-2">
       <div>
         <div class="slider-row"><label>Saldırı Gel.</label><span id="atkUpVal">0</span></div>
         <input type="range" id="atkUpgrade" min="0" max="10" value="0" oninput="updateSliders(); calculate();">
@@ -167,8 +198,8 @@
     container.innerHTML = units.map(u => `
       <div class="unit-row">
         <div class="unit-info">
-          <div><b>${u.name}</b></div>
-          <div class="unit-meta">Atk: ${u.atk} | Tür: ${u.type}</div>
+          <div>${u.name}</div>
+          <div class="unit-meta">Saldırı: ${u.atk} | Tür: ${u.type}</div>
         </div>
         <input type="number" min="0" value="${attackerCounts[u.id]}" class="unit-input"
                onchange="attackerCounts['${u.id}']=parseInt(this.value)||0; calculate();">
@@ -182,8 +213,8 @@
     container.innerHTML = units.map(u => `
       <div class="unit-row">
         <div class="unit-info">
-          <div><b>${u.name}</b></div>
-          <div class="unit-meta">DY: ${u.dy} | DA: ${u.da}</div>
+          <div>${u.name}</div>
+          <div class="unit-meta">Yaya Sav: ${u.dy} | Atlı Sav: ${u.da}</div>
         </div>
         <input type="number" min="0" value="${defenderCounts[u.id]}" class="unit-input"
                onchange="defenderCounts['${u.id}']=parseInt(this.value)||0; calculate();">
@@ -211,7 +242,6 @@
     const atkUp = parseInt(document.getElementById("atkUpgrade").value) || 0;
     const defUp = parseInt(document.getElementById("defUpgrade").value) || 0;
 
-    // 1. Saldırı Gücü & Süvari Oranı
     let rawAtk = 0, cavAtk = 0;
     TROOPS.forEach(t => {
       const c = attackerCounts[t.id] || 0;
@@ -225,7 +255,6 @@
     const rInf = 1.0 - rCav;
     const totalAtk = rawAtk * FACTIONS[atkF].sal * (1 + atkUp * 0.00727);
 
-    // 2. Efektif Savunma Gücü
     let rawDef = 0;
     TROOPS.forEach(t => {
       const c = defenderCounts[t.id] || 0;
@@ -237,10 +266,9 @@
     const wallMultiplier = 1.0 + (wall * FACTIONS[defVillageF].sur);
     const totalDef = rawDef * FACTIONS[defVillageF].sav * wallMultiplier * (1 + defUp * 0.00584);
 
-    // 3. Sonuç ve Kayıplar
     const summary = document.getElementById("reportSummary");
     if (totalAtk === 0 && totalDef === 0) {
-      summary.innerHTML = "Lütfen ordu birim sayılarını girin.";
+      summary.innerHTML = "Birlikleri girin...";
       return;
     }
 
@@ -268,12 +296,12 @@
         </div>
         <div style="text-align:right;">
           <label>Savunma Gücü</label>
-          <div class="power-val" style="color:#4cc9f0;">${Math.round(totalDef).toLocaleString()}</div>
+          <div class="power-val" style="color:var(--primary);">${Math.round(totalDef).toLocaleString()}</div>
           <div class="unit-meta">Sur Bonusu: %${((wallMultiplier-1)*100).toFixed(0)}</div>
         </div>
       </div>
-      <div style="border-top:1px solid #2c2f3e; padding-top:6px; font-size:12px;">
-        <b>Kazanan:</b> <span style="color:${atkWins ? 'var(--accent)' : '#4cc9f0'}; font-weight:bold;">${atkWins ? 'Saldıran' : 'Savunan'}</span><br>
+      <div style="border-top:1px solid var(--border); padding-top:6px; font-size:12px;">
+        <b>Kazanan:</b> <span style="color:${atkWins ? 'var(--accent)' : 'var(--primary)'}; font-weight:bold;">${atkWins ? 'Saldıran' : 'Savunan'}</span><br>
         <b>Saldıran Kaybı:</b> %${(atkLossRate * 100).toFixed(2)}<br>
         <b>Savunan Kaybı:</b> %${(defLossRate * 100).toFixed(2)}
       </div>
@@ -289,7 +317,6 @@
     calculate();
   }
 
-  // İlk Yükleme
   renderAttackerUnits();
   renderDefenderUnits("HUN", "defHunTab");
   renderDefenderUnits("GÖKTÜRK", "defGokTab");
