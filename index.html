@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Targun Online Savaş Simülatörü</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: var(--tg-theme-bg-color, #131419);
+      --card-bg: var(--tg-theme-secondary-bg-color, #1e2029);
+      --text: var(--tg-theme-text-color, #f1f1f1);
+      --hint: var(--tg-theme-hint-color, #8a8d9b);
+      --btn: var(--tg-theme-button-color, #d49a37);
+      --btn-text: var(--tg-theme-button-text-color, #ffffff);
+      --accent: #e09f3e;
+      --danger: #e63946;
+      --success: #2a9d8f;
+      --border: #2c2f3e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 12px; font-size: 14px; }
+    
+    .card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .header-title { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    label { font-size: 11px; color: var(--hint); display: block; margin-bottom: 3px; font-weight: 600; }
+    select, input[type="number"], input[type="range"] {
+      width: 100%; background: #121318; border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 8px; font-size: 13px; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--accent); }
+    
+    .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .slider-row span { font-weight: bold; color: var(--accent); }
+    
+    .tabs { display: flex; overflow-x: auto; gap: 4px; margin-bottom: 10px; padding-bottom: 2px; }
+    .tab-btn {
+      flex: 1; min-width: 75px; padding: 8px 4px; font-size: 11px; font-weight: bold;
+      background: #121318; border: 1px solid var(--border); border-radius: 6px; color: var(--hint);
+      cursor: pointer; text-align: center; white-space: nowrap;
+    }
+    .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    
+    .unit-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #232634; }
+    .unit-row:last-child { border-bottom: none; }
+    .unit-info { font-size: 12px; }
+    .unit-meta { font-size: 10px; color: var(--hint); }
+    .unit-input { width: 85px !important; text-align: right; font-weight: bold; }
+    
+    .results { background: #181a24; border-left: 4px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 10px; }
+    .power-val { font-size: 18px; font-weight: bold; }
+    .stat-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-top: 4px; }
+    
+    .btn-reset { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--danger); color: var(--danger); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="header-title">⚔️ Savaş Ayarları</div>
+    <div class="grid-2">
+      <div>
+        <label>Saldıran Ulus</label>
+        <select id="attackerFaction" onchange="renderAttackerUnits(); calculate();">
+          <option value="HUN">HUN</option>
+          <option value="GÖKTÜRK">GÖKTÜRK</option>
+          <option value="SELÇUK">SELÇUK</option>
+        </select>
+      </div>
+      <div>
+        <label>Köy Sahibi Ulus</label>
+        <select id="defenderVillageFaction" onchange="calculate();">
+          <option value="HUN">HUN</option>
+          <option value="GÖKTÜRK" selected>GÖKTÜRK</option>
+          <option value="SELÇUK">SELÇUK</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 6px;">
+      <div class="slider-row"><label>Sur Seviyesi</label><span id="wallVal">0</span></div>
+      <input type="range" id="wallLevel" min="0" max="10" value="0" oninput="updateSliders(); calculate();">
+    </div>
+
+    <div class="grid-2" style="margin-top: 6px;">
+      <div>
+        <div class="slider-row"><label>Saldırı Gel.</label><span id="atkUpVal">0</span></div>
+        <input type="range" id="atkUpgrade" min="0" max="10" value="0" oninput="updateSliders(); calculate();">
+      </div>
+      <div>
+        <div class="slider-row"><label>Savunma Gel.</label><span id="defUpVal">0</span></div>
+        <input type="range" id="defUpgrade" min="0" max="10" value="0" oninput="updateSliders(); calculate();">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('atkTab', this)">Saldıran</button>
+      <button class="tab-btn" onclick="switchTab('defHunTab', this)">Sav: HUN</button>
+      <button class="tab-btn" onclick="switchTab('defGokTab', this)">Sav: GÖK</button>
+      <button class="tab-btn" onclick="switchTab('defSlcTab', this)">Sav: SLÇK</button>
+    </div>
+
+    <div id="atkTab" class="tab-content"></div>
+    <div id="defHunTab" class="tab-content" style="display:none;"></div>
+    <div id="defGokTab" class="tab-content" style="display:none;"></div>
+    <div id="defSlcTab" class="tab-content" style="display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="header-title">📊 Savaş Raporu</div>
+    <div id="reportSummary" class="results">Birlikleri girin...</div>
+    <button class="btn-reset" onclick="resetAll()">Tüm Birlikleri Sıfırla</button>
+  </div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); }
+
+  const FACTIONS = {
+    "HUN": { sal: 1.10, sav: 1.00, sur: 0.03 },
+    "GÖKTÜRK": { sal: 1.00, sav: 1.125, sur: 0.04 },
+    "SELÇUK": { sal: 1.075, sav: 1.075, sur: 0.035 }
+  };
+
+  const TROOPS = [
+    {id: "h1", f: "HUN", name: "HUN - Toygun", type: "Yaya", atk: 25, dy: 25, da: 25},
+    {id: "h2", f: "HUN", name: "HUN - Kemankeş", type: "Yaya", atk: 30, dy: 80, da: 15},
+    {id: "h3", f: "HUN", name: "HUN - Tarık", type: "Yaya", atk: 30, dy: 30, da: 90},
+    {id: "h4", f: "HUN", name: "HUN - Barlas", type: "Yaya", atk: 130, dy: 50, da: 70},
+    {id: "h5", f: "HUN", name: "HUN - Tunga", type: "Atlı", atk: 50, dy: 50, da: 110},
+    {id: "h6", f: "HUN", name: "HUN - Talakan", type: "Atlı", atk: 120, dy: 110, da: 20},
+    {id: "h7", f: "HUN", name: "HUN - Tarkan", type: "Atlı", atk: 190, dy: 70, da: 70},
+    {id: "h8", f: "HUN", name: "HUN - Mancınık", type: "Kuşatma", atk: 90, dy: 45, da: 130},
+    {id: "h9", f: "HUN", name: "HUN - Topçu", type: "Kuşatma", atk: 160, dy: 55, da: 150},
+    {id: "g1", f: "GÖKTÜRK", name: "GÖK - Karabudun", type: "Yaya", atk: 20, dy: 30, da: 15},
+    {id: "g2", f: "GÖKTÜRK", name: "GÖK - Kemankeş", type: "Yaya", atk: 25, dy: 100, da: 30},
+    {id: "g3", f: "GÖKTÜRK", name: "GÖK - Tapukçi", type: "Yaya", atk: 10, dy: 20, da: 150},
+    {id: "g4", f: "GÖKTÜRK", name: "GÖK - Mavi Kurt", type: "Yaya", atk: 100, dy: 80, da: 40},
+    {id: "g5", f: "GÖKTÜRK", name: "GÖK - Muhafız", type: "Atlı", atk: 40, dy: 140, da: 50},
+    {id: "g6", f: "GÖKTÜRK", name: "GÖK - Mavi Atlı", type: "Atlı", atk: 110, dy: 50, da: 50},
+    {id: "g7", f: "GÖKTÜRK", name: "GÖK - Kürşad", type: "Atlı", atk: 150, dy: 110, da: 110},
+    {id: "g8", f: "GÖKTÜRK", name: "GÖK - Mancınık", type: "Kuşatma", atk: 90, dy: 45, da: 130},
+    {id: "g9", f: "GÖKTÜRK", name: "GÖK - Topçu", type: "Kuşatma", atk: 160, dy: 55, da: 150},
+    {id: "s1", f: "SELÇUK", name: "SLÇK - Gulam", type: "Yaya", atk: 15, dy: 20, da: 10},
+    {id: "s2", f: "SELÇUK", name: "SLÇK - Kemankeş", type: "Yaya", atk: 25, dy: 90, da: 15},
+    {id: "s3", f: "SELÇUK", name: "SLÇK - Selçuk", type: "Yaya", atk: 40, dy: 20, da: 90},
+    {id: "s4", f: "SELÇUK", name: "SLÇK - Alparslan", type: "Yaya", atk: 115, dy: 55, da: 55},
+    {id: "s5", f: "SELÇUK", name: "SLÇK - Kargılı", type: "Atlı", atk: 20, dy: 50, da: 140},
+    {id: "s6", f: "SELÇUK", name: "SLÇK - Atlı Okçu", type: "Atlı", atk: 60, dy: 120, da: 20},
+    {id: "s7", f: "SELÇUK", name: "SLÇK - Sipahi", type: "Atlı", atk: 160, dy: 90, da: 90},
+    {id: "s8", f: "SELÇUK", name: "SLÇK - Mancınık", type: "Kuşatma", atk: 90, dy: 45, da: 130},
+    {id: "s9", f: "SELÇUK", name: "SLÇK - Topçu", type: "Kuşatma", atk: 160, dy: 55, da: 150}
+  ];
+
+  let attackerCounts = {};
+  let defenderCounts = {};
+  TROOPS.forEach(t => { attackerCounts[t.id] = 0; defenderCounts[t.id] = 0; });
+
+  function renderAttackerUnits() {
+    const f = document.getElementById("attackerFaction").value;
+    const container = document.getElementById("atkTab");
+    const units = TROOPS.filter(t => t.f === f);
+    container.innerHTML = units.map(u => `
+      <div class="unit-row">
+        <div class="unit-info">
+          <div><b>${u.name}</b></div>
+          <div class="unit-meta">Atk: ${u.atk} | Tür: ${u.type}</div>
+        </div>
+        <input type="number" min="0" value="${attackerCounts[u.id]}" class="unit-input"
+               onchange="attackerCounts['${u.id}']=parseInt(this.value)||0; calculate();">
+      </div>
+    `).join("");
+  }
+
+  function renderDefenderUnits(faction, elemId) {
+    const container = document.getElementById(elemId);
+    const units = TROOPS.filter(t => t.f === faction);
+    container.innerHTML = units.map(u => `
+      <div class="unit-row">
+        <div class="unit-info">
+          <div><b>${u.name}</b></div>
+          <div class="unit-meta">DY: ${u.dy} | DA: ${u.da}</div>
+        </div>
+        <input type="number" min="0" value="${defenderCounts[u.id]}" class="unit-input"
+               onchange="defenderCounts['${u.id}']=parseInt(this.value)||0; calculate();">
+      </div>
+    `).join("");
+  }
+
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    btn.classList.add('active');
+  }
+
+  function updateSliders() {
+    document.getElementById('wallVal').innerText = document.getElementById('wallLevel').value;
+    document.getElementById('atkUpVal').innerText = document.getElementById('atkUpgrade').value;
+    document.getElementById('defUpVal').innerText = document.getElementById('defUpgrade').value;
+  }
+
+  function calculate() {
+    const atkF = document.getElementById("attackerFaction").value;
+    const defVillageF = document.getElementById("defenderVillageFaction").value;
+    const wall = parseInt(document.getElementById("wallLevel").value) || 0;
+    const atkUp = parseInt(document.getElementById("atkUpgrade").value) || 0;
+    const defUp = parseInt(document.getElementById("defUpgrade").value) || 0;
+
+    // 1. Saldırı Gücü & Süvari Oranı
+    let rawAtk = 0, cavAtk = 0;
+    TROOPS.forEach(t => {
+      const c = attackerCounts[t.id] || 0;
+      if (t.f === atkF && c > 0) {
+        rawAtk += c * t.atk;
+        if (t.type === "Atlı") cavAtk += c * t.atk;
+      }
+    });
+
+    const rCav = rawAtk > 0 ? (cavAtk / rawAtk) : 0;
+    const rInf = 1.0 - rCav;
+    const totalAtk = rawAtk * FACTIONS[atkF].sal * (1 + atkUp * 0.00727);
+
+    // 2. Efektif Savunma Gücü
+    let rawDef = 0;
+    TROOPS.forEach(t => {
+      const c = defenderCounts[t.id] || 0;
+      if (c > 0) {
+        rawDef += c * (t.dy * rInf + t.da * rCav);
+      }
+    });
+
+    const wallMultiplier = 1.0 + (wall * FACTIONS[defVillageF].sur);
+    const totalDef = rawDef * FACTIONS[defVillageF].sav * wallMultiplier * (1 + defUp * 0.00584);
+
+    // 3. Sonuç ve Kayıplar
+    const summary = document.getElementById("reportSummary");
+    if (totalAtk === 0 && totalDef === 0) {
+      summary.innerHTML = "Lütfen ordu birim sayılarını girin.";
+      return;
+    }
+
+    const atkWins = totalAtk > totalDef;
+    let atkLossRate = 0, defLossRate = 0;
+
+    if (atkWins) {
+      defLossRate = 1.0;
+      const ratio = totalDef / totalAtk;
+      atkLossRate = Math.min(1.0, Math.pow(ratio, 1.56));
+    } else {
+      atkLossRate = 1.0;
+      const ratio = totalAtk / totalDef;
+      defLossRate = Math.min(1.0, Math.pow(ratio, 1.56));
+    }
+
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+    summary.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <div>
+          <label>Saldırı Gücü</label>
+          <div class="power-val" style="color:var(--accent);">${Math.round(totalAtk).toLocaleString()}</div>
+          <div class="unit-meta">Atlı Payı: %${(rCav*100).toFixed(1)}</div>
+        </div>
+        <div style="text-align:right;">
+          <label>Savunma Gücü</label>
+          <div class="power-val" style="color:#4cc9f0;">${Math.round(totalDef).toLocaleString()}</div>
+          <div class="unit-meta">Sur Bonusu: %${((wallMultiplier-1)*100).toFixed(0)}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #2c2f3e; padding-top:6px; font-size:12px;">
+        <b>Kazanan:</b> <span style="color:${atkWins ? 'var(--accent)' : '#4cc9f0'}; font-weight:bold;">${atkWins ? 'Saldıran' : 'Savunan'}</span><br>
+        <b>Saldıran Kaybı:</b> %${(atkLossRate * 100).toFixed(2)}<br>
+        <b>Savunan Kaybı:</b> %${(defLossRate * 100).toFixed(2)}
+      </div>
+    `;
+  }
+
+  function resetAll() {
+    TROOPS.forEach(t => { attackerCounts[t.id] = 0; defenderCounts[t.id] = 0; });
+    renderAttackerUnits();
+    renderDefenderUnits("HUN", "defHunTab");
+    renderDefenderUnits("GÖKTÜRK", "defGokTab");
+    renderDefenderUnits("SELÇUK", "defSlcTab");
+    calculate();
+  }
+
+  // İlk Yükleme
+  renderAttackerUnits();
+  renderDefenderUnits("HUN", "defHunTab");
+  renderDefenderUnits("GÖKTÜRK", "defGokTab");
+  renderDefenderUnits("SELÇUK", "defSlcTab");
+  updateSliders();
+</script>
+</body>
+</html>
