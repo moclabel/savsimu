@@ -6,85 +6,169 @@
   <title>Targun Online Savaş Simülatörü</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root {
-      --bg: #f4f5f8;
-      --card-bg: #ffffff;
-      --text: #1a1c23;
-      --text-muted: #5e6472;
-      --border: #dcdfe6;
-      --input-bg: #f8f9fc;
-      --input-text: #11141a;
-      --accent: #d97706;
-      --accent-text: #ffffff;
-      --danger: #dc2626;
-      --primary: #2563eb;
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      -webkit-tap-highlight-color: transparent;
     }
-
-    /* Kullanıcı Telegram'ı koyu modda kullanıyorsa da kusursuz kontrast sağlansın */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111318;
-        --card-bg: #1a1d24;
-        --text: #f3f4f6;
-        --text-muted: #9ca3af;
-        --border: #2d3139;
-        --input-bg: #242832;
-        --input-text: #ffffff;
-        --accent: #f59e0b;
-        --accent-text: #000000;
-        --danger: #ef4444;
-        --primary: #3b82f6;
-      }
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; font-size: 14px; -webkit-tap-highlight-color: transparent; }
-
-    .card { background: var(--card-bg); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-    .header-title { font-size: 15px; font-weight: 800; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
-
-    select, input[type="number"] {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1.5px solid var(--border);
-      color: var(--input-text);
-      border-radius: 8px;
-      padding: 9px 10px;
-      font-size: 14px;
-      font-weight: 700;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    select:focus, input[type="number"]:focus { border-color: var(--accent); }
-
-    .slider-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; margin-top: 6px; }
-    .slider-row span { font-weight: 800; color: var(--accent); font-size: 13px; }
-    input[type="range"] {
-      width: 100%; accent-color: var(--accent); height: 6px; background: var(--border); border-radius: 4px; outline: none; margin-bottom: 6px;
-    }
-
-    .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-    .tab-btn {
-      flex: 1; padding: 9px 4px; font-size: 11px; font-weight: 800;
-      background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text-muted);
-      cursor: pointer; text-align: center; white-space: nowrap; transition: all 0.2s;
-    }
-    .tab-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-
-    .unit-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .unit-row:last-child { border-bottom: none; }
-    .unit-info { font-size: 13px; font-weight: 700; color: var(--text); }
-    .unit-meta { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
-    .unit-input { width: 85px !important; text-align: right; padding: 7px 8px !important; }
-
-    .results { background: var(--input-bg); border-left: 4px solid var(--accent); padding: 12px; border-radius: 8px; margin-top: 8px; }
-    .power-val { font-size: 19px; font-weight: 900; }
     
-    .btn-reset { width: 100%; padding: 11px; background: transparent; border: 1.5px solid var(--danger); color: var(--danger); border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px; font-size: 12px; }
-    .btn-reset:active { background: var(--danger); color: #fff; }
+    body { 
+      background-color: #121318 !important; 
+      color: #ffffff !important; 
+      padding: 12px; 
+      font-size: 14px; 
+    }
+
+    .card { 
+      background-color: #1c1e24 !important; 
+      border-radius: 12px; 
+      padding: 14px; 
+      margin-bottom: 12px; 
+      border: 1px solid #2d303a; 
+    }
+    
+    .header-title { 
+      font-size: 15px; 
+      font-weight: 800; 
+      color: #f59e0b !important; 
+      margin-bottom: 10px; 
+      text-transform: uppercase; 
+    }
+
+    .grid-2 { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 10px; 
+      margin-bottom: 10px; 
+    }
+    
+    label { 
+      font-size: 11px; 
+      color: #9ca3af !important; 
+      display: block; 
+      margin-bottom: 4px; 
+      font-weight: 700; 
+    }
+
+    /* TÜM GİRİŞ KUTULARI VE AÇILIR MENÜLER - SİYAH ZEMİN ÜZERİNE PARLAK KIRMIZI YAZI */
+    select, input[type="number"] {
+      width: 100% !important;
+      background-color: #000000 !important;
+      color: #ff3333 !important;
+      border: 1.5px solid #ff3333 !important;
+      border-radius: 8px !important;
+      padding: 10px !important;
+      font-size: 15px !important;
+      font-weight: 900 !important;
+      outline: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+    }
+
+    select option {
+      background-color: #000000 !important;
+      color: #ff3333 !important;
+      font-weight: bold !important;
+    }
+
+    .slider-row { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 4px; 
+      margin-top: 6px; 
+    }
+    .slider-row span { 
+      font-weight: 800; 
+      color: #ff3333 !important; 
+      font-size: 14px; 
+    }
+    
+    input[type="range"] {
+      width: 100%; 
+      accent-color: #ff3333; 
+      height: 6px; 
+      background: #2d303a; 
+      border-radius: 4px; 
+      outline: none; 
+      margin-bottom: 6px;
+    }
+
+    .tabs { 
+      display: flex; 
+      gap: 6px; 
+      margin-bottom: 12px; 
+    }
+    .tab-btn {
+      flex: 1; 
+      padding: 10px 4px; 
+      font-size: 11px; 
+      font-weight: 800;
+      background-color: #000000 !important; 
+      border: 1px solid #333333 !important; 
+      border-radius: 8px; 
+      color: #ffffff !important;
+      cursor: pointer; 
+      text-align: center; 
+      white-space: nowrap;
+    }
+    .tab-btn.active { 
+      background-color: #ff3333 !important; 
+      color: #ffffff !important; 
+      border-color: #ff3333 !important; 
+    }
+
+    .unit-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 10px 0; 
+      border-bottom: 1px solid #2d303a; 
+    }
+    .unit-row:last-child { border-bottom: none; }
+    .unit-info { 
+      font-size: 13px; 
+      font-weight: 700; 
+      color: #ffffff !important; 
+    }
+    .unit-meta { 
+      font-size: 11px; 
+      color: #9ca3af !important; 
+      font-weight: 500; 
+      margin-top: 2px; 
+    }
+    .unit-input { 
+      width: 90px !important; 
+      text-align: right !important; 
+    }
+
+    .results { 
+      background-color: #000000 !important; 
+      border-left: 4px solid #ff3333; 
+      padding: 12px; 
+      border-radius: 8px; 
+      margin-top: 8px; 
+      color: #ffffff !important;
+    }
+    .power-val { 
+      font-size: 20px; 
+      font-weight: 900; 
+    }
+    
+    .btn-reset { 
+      width: 100%; 
+      padding: 12px; 
+      background: #000000 !important; 
+      border: 1.5px solid #ff3333 !important; 
+      color: #ff3333 !important; 
+      border-radius: 8px; 
+      font-weight: 800; 
+      cursor: pointer; 
+      margin-top: 10px; 
+      font-size: 13px; 
+    }
   </style>
 </head>
 <body>
@@ -291,17 +375,17 @@
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
         <div>
           <label>Saldırı Gücü</label>
-          <div class="power-val" style="color:var(--accent);">${Math.round(totalAtk).toLocaleString()}</div>
+          <div class="power-val" style="color:#ff3333;">${Math.round(totalAtk).toLocaleString()}</div>
           <div class="unit-meta">Atlı Payı: %${(rCav*100).toFixed(1)}</div>
         </div>
         <div style="text-align:right;">
           <label>Savunma Gücü</label>
-          <div class="power-val" style="color:var(--primary);">${Math.round(totalDef).toLocaleString()}</div>
+          <div class="power-val" style="color:#38bdf8;">${Math.round(totalDef).toLocaleString()}</div>
           <div class="unit-meta">Sur Bonusu: %${((wallMultiplier-1)*100).toFixed(0)}</div>
         </div>
       </div>
-      <div style="border-top:1px solid var(--border); padding-top:6px; font-size:12px;">
-        <b>Kazanan:</b> <span style="color:${atkWins ? 'var(--accent)' : 'var(--primary)'}; font-weight:bold;">${atkWins ? 'Saldıran' : 'Savunan'}</span><br>
+      <div style="border-top:1px solid #2d303a; padding-top:6px; font-size:12px;">
+        <b>Kazanan:</b> <span style="color:${atkWins ? '#ff3333' : '#38bdf8'}; font-weight:bold;">${atkWins ? 'Saldıran' : 'Savunan'}</span><br>
         <b>Saldıran Kaybı:</b> %${(atkLossRate * 100).toFixed(2)}<br>
         <b>Savunan Kaybı:</b> %${(defLossRate * 100).toFixed(2)}
       </div>
